@@ -2,6 +2,7 @@
 #import <UIKit/UIKit.h>
 #import "RCTContacts.h"
 #import <AssetsLibrary/AssetsLibrary.h>
+#import <React/RCTLog.h>
 
 @implementation RCTContacts {
     CNContactStore * contactStore;
@@ -616,6 +617,72 @@ RCT_EXPORT_METHOD(deleteContact:(NSDictionary *)contactData callback:(RCTRespons
     }
     @catch (NSException *exception) {
         callback(@[[exception description], [NSNull null]]);
+    }
+}
+
+RCT_EXPORT_METHOD(exportVCard:(NSArray *)contactIds callback:(RCTResponseSenderBlock) callback)
+{
+    CNContactStore *contactStore = [[CNContactStore alloc] init];
+    if (!contactStore) {
+        callback(@[@"undefined", [NSNull null]]);
+    }
+    
+    NSArray *keys = @[
+        CNContactIdentifierKey,
+        CNContactNamePrefixKey,
+        CNContactGivenNameKey,
+        CNContactMiddleNameKey,
+        CNContactFamilyNameKey,
+        CNContactPreviousFamilyNameKey,
+        CNContactNameSuffixKey,
+        CNContactNicknameKey,
+        CNContactOrganizationNameKey,
+        CNContactDepartmentNameKey,
+        CNContactJobTitleKey,
+        CNContactPhoneticGivenNameKey,
+        CNContactPhoneticMiddleNameKey,
+        CNContactPhoneticFamilyNameKey,
+        CNContactPhoneticOrganizationNameKey,
+        CNContactBirthdayKey,
+        CNContactNonGregorianBirthdayKey,
+        CNContactNoteKey,
+        CNContactImageDataKey,
+        CNContactThumbnailImageDataKey,
+        CNContactImageDataAvailableKey,
+        CNContactTypeKey,
+        CNContactPhoneNumbersKey,
+        CNContactEmailAddressesKey,
+        CNContactPostalAddressesKey,
+        CNContactDatesKey,
+        CNContactUrlAddressesKey,
+        CNContactRelationsKey,
+        CNContactSocialProfilesKey,
+        CNContactInstantMessageAddressesKey,
+        [CNContactVCardSerialization descriptorForRequiredKeys]
+    ];
+    
+    // RCTLogInfo(@"contactIds: %@", contactIds);
+    NSError *fetchError = nil;
+    NSArray *contacts = [contactStore unifiedContactsMatchingPredicate:[CNContact predicateForContactsWithIdentifiers:contactIds]
+                                                           keysToFetch:keys
+                                                                 error:&fetchError];
+    if (fetchError == nil) {
+        // RCTLogInfo(@"contacts: %@", contacts);
+        NSError *dataError = nil;
+        NSData *data = [CNContactVCardSerialization dataWithContacts:contacts
+                                                               error:&dataError];
+        if (dataError == nil) {
+            // RCTLogInfo(@"data: %@", data);
+            NSString* string = [[NSString alloc] initWithData:data encoding:NSNonLossyASCIIStringEncoding];
+            // RCTLogInfo(@"string: %@", string);
+            callback(@[[NSNull null], string]);
+        } else {
+            RCTLogInfo(@"dataError: %@", dataError);
+            callback(@[[dataError localizedDescription], [NSNull null]]);
+        }
+    } else {
+        RCTLogInfo(@"fetchError: %@", fetchError);
+        callback(@[[fetchError localizedDescription], [NSNull null]]);
     }
 }
 
