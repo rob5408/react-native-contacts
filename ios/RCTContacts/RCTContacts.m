@@ -686,6 +686,24 @@ RCT_EXPORT_METHOD(exportVCard:(NSArray *)contactIds callback:(RCTResponseSenderB
     }
 }
 
+RCT_EXPORT_METHOD(importVCard:(NSString *)stringData callback:(RCTResponseSenderBlock) callback)
+{
+    NSData *data = [stringData dataUsingEncoding:NSNonLossyASCIIStringEncoding];
+
+//    RCTLogInfo(@"fetchError: %@", fetchError);
+    if (data == nil) {
+        callback(@[@"undefined error", [NSNull null]]);
+    } else {
+        NSError *error = nil;
+        NSArray<CNContact *> *contacts = [CNContactVCardSerialization contactsWithData:data error:&error];
+        if (error == nil) {
+            callback(@[[NSNull null], contacts]);
+        } else {
+            callback(@[[error localizedDescription], [NSNull null]]);
+        }
+    }
+}
+
 -(CNContactStore*) contactsStore: (RCTResponseSenderBlock)callback {
     if(!contactStore) {
         CNContactStore* store = [[CNContactStore alloc] init];

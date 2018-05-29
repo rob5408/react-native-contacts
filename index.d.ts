@@ -10,6 +10,7 @@ declare module 'react-native-contacts' {
   export function checkPermission(callback: (error: any, result: 'authorized' | 'denied') => void): void;
   export function requestPermission(callback: (error: any, result: 'authorized' | 'denied') => void): void;
   export function exportVCard(contactIds: Array, callback: (error: any, data: string) => void): void;
+  export function importVCard(data: string, callback: (error: any, contacts: Contact[]) => void): void;
 
   export interface EmailAddress {
       label: string;

@@ -1,39 +1,5 @@
 package com.rt2zz.reactnativecontacts;
 
-import android.Manifest;
-import android.app.Activity;
-import android.content.BroadcastReceiver;
-import android.content.ContentProviderOperation;
-import android.content.ContentResolver;
-import android.content.ContentValues;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.pm.PackageManager;
-import android.os.AsyncTask;
-import android.provider.ContactsContract;
-import android.provider.ContactsContract.CommonDataKinds;
-import android.provider.ContactsContract.CommonDataKinds.Organization;
-import android.provider.ContactsContract.CommonDataKinds.StructuredName;
-import android.provider.ContactsContract.RawContacts;
-
-import android.support.annotation.NonNull;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.LocalBroadcastManager;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-
-
-import com.facebook.react.bridge.Callback;
-import com.facebook.react.bridge.ReactApplicationContext;
-import com.facebook.react.bridge.ReactContextBaseJavaModule;
-import com.facebook.react.bridge.ReactMethod;
-import com.facebook.react.bridge.ReadableArray;
-import com.facebook.react.bridge.ReadableMap;
-import com.facebook.react.bridge.WritableMap;
-import com.facebook.react.bridge.WritableArray;
-import com.facebook.react.bridge.Arguments;
-
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.io.ByteArrayOutputStream;
@@ -41,10 +7,41 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 
-import android.net.Uri;
+import android.Manifest;
+import android.app.Activity;
+import android.content.BroadcastReceiver;
+import android.content.ContentProviderOperation;
 import android.content.ContentProviderResult;
+import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.ContentUris;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
+import android.os.AsyncTask;
+import android.provider.ContactsContract;
+import android.provider.ContactsContract.CommonDataKinds;
+import android.provider.ContactsContract.CommonDataKinds.Organization;
+import android.provider.ContactsContract.CommonDataKinds.StructuredName;
+import android.provider.ContactsContract.RawContacts;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.LocalBroadcastManager;
+import android.util.Log;
 
+import com.facebook.react.bridge.Callback;
+import com.facebook.react.bridge.ReactApplicationContext;
+import com.facebook.react.bridge.ReactContextBaseJavaModule;
+import com.facebook.react.bridge.ReactMethod;
+import com.facebook.react.bridge.ReadableArray;
+import com.facebook.react.bridge.ReadableMap;
+import com.facebook.react.bridge.WritableArray;
+import com.facebook.react.bridge.WritableMap;
+import com.facebook.react.bridge.Arguments;
 
 public class ContactsManager extends ReactContextBaseJavaModule {
 
@@ -572,7 +569,7 @@ public class ContactsManager extends ReactContextBaseJavaModule {
     }
 
     /*
-     * Update contact to phone's addressbook
+     * Delete contact from phone's addressbook
      */
     @ReactMethod
     public void deleteContact(ReadableMap contact, Callback callback) {
@@ -580,21 +577,105 @@ public class ContactsManager extends ReactContextBaseJavaModule {
         String recordID = contact.hasKey("recordID") ? contact.getString("recordID") : null;
       
         try {
-               Context ctx = getReactApplicationContext();
+            Context ctx = getReactApplicationContext();
 
-               Uri uri = Uri.withAppendedPath(ContactsContract.Contacts.CONTENT_URI,recordID);
-               ContentResolver cr = ctx.getContentResolver();
-               int deleted = cr.delete(uri,null,null);
+            Uri uri = Uri.withAppendedPath(ContactsContract.Contacts.CONTENT_URI, recordID);
+            ContentResolver cr = ctx.getContentResolver();
+            int deleted = cr.delete(uri, null, null);
 
-               if(deleted > 0)
-                 callback.invoke(null, recordID); // success
-               else
-                 callback.invoke(null, null); // something was wrong
-
+            if (deleted > 0) {
+                callback.invoke(null, recordID);
+            } else {
+                callback.invoke(null, null);
+            }
         } catch (Exception e) {
             callback.invoke(e.toString(), null);
         }
     }
+
+    // Cursor cursor;
+    // ArrayList<String> vCard;
+    // String vfile;
+
+    private void getVcardString() {
+        // TODO Auto-generated method stub
+        // vCard = new ArrayList<String>();
+        // cursor = getContentResolver().query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null, null, null, null);
+        // if(cursor != null && cursor.getCount() > 0) {
+        //     cursor.moveToFirst();
+        //     for(int i = 0; i < cursor.getCount(); i++) {
+        //         get(cursor);
+        //         Log.d("TAG", "Contact "+(i+1)+"VcF String is"+vCard.get(i));
+        //         cursor.moveToNext();
+        //     }
+        // } else {
+        //     Log.d("TAG", "No Contacts in Your Phone");
+        // }
+    }
+
+//     public void get(Cursor cursor) {
+//         //cursor.moveToFirst();
+//         String lookupKey = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.LOOKUP_KEY));
+//         Uri uri = Uri.withAppendedPath(ContactsContract.Contacts.CONTENT_VCARD_URI, lookupKey);
+//         AssetFileDescriptor fd;
+//         try {
+//             fd = this.getContentResolver().openAssetFileDescriptor(uri, "r");
+
+            // Your Complex Code and you used function without loop so how can you get all Contacts Vcard.??
+
+
+           /* FileInputStream fis = fd.createInputStream();
+            byte[] buf = new byte[(int) fd.getDeclaredLength()];
+            fis.read(buf);
+            String VCard = new String(buf);
+            String path = Environment.getExternalStorageDirectory().toString() + File.separator + vfile;
+            FileOutputStream out = new FileOutputStream(path);
+            out.write(VCard.toString().getBytes());
+            Log.d("Vcard",  VCard);*/
+
+//             FileInputStream fis = fd.createInputStream();
+//             byte[] buf = new byte[(int) fd.getDeclaredLength()];
+//             fis.read(buf);
+//             String vcardstring= new String(buf);
+//             vCard.add(vcardstring);
+// 
+//             String storage_path = Environment.getExternalStorageDirectory().toString() + File.separator + vfile;
+//             FileOutputStream mFileOutputStream = new FileOutputStream(storage_path, true);
+//             mFileOutputStream.write(vcardstring.toString().getBytes());
+// 
+//         } catch (Exception e1) {
+//             // TODO Auto-generated catch block
+//             e1.printStackTrace();
+//         }
+//     }
+
+    @ReactMethod
+    public void exportVCard(ReadableArray contactIds, Callback callback) {
+        // Log.d("TAG", "exportVCard");
+        // vfile = "Contacts" + "_" + System.currentTimeMillis()+".vcf";
+        // getVcardString();
+
+        // String recordID = contact.hasKey("recordID") ? contact.getString("recordID") : null;
+      
+        callback.invoke("Unable to export contact to vCard.", null);
+
+        // try {
+        //        Context ctx = getReactApplicationContext();
+
+        //        Uri uri = Uri.withAppendedPath(ContactsContract.Contacts.CONTENT_URI,recordID);
+        //        ContentResolver cr = ctx.getContentResolver();
+        //        int deleted = cr.delete(uri,null,null);
+
+        //        if(deleted > 0)
+        //          callback.invoke(null, recordID); // success
+        //        else
+        //          callback.invoke(null, null); // something was wrong
+
+        // } catch (Exception e) {
+        //     callback.invoke(e.toString(), null);
+        // }
+    }
+
     /*
      * Check permission
      */

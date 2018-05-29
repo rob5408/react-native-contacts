@@ -313,18 +313,31 @@ public class ContactsProvider {
             } else if (mimeType.equals(Event.CONTENT_ITEM_TYPE)) {
                 int eventType = cursor.getInt(cursor.getColumnIndex(Event.TYPE));
                 if (eventType == Event.TYPE_BIRTHDAY) {
-                    String birthday = cursor.getString(cursor.getColumnIndex(Event.START_DATE)).replace("--", "");
-                    String[] yearMonthDay = birthday.split("-");
-                    List<String> yearMonthDayList = Arrays.asList(yearMonthDay);
-                    if (yearMonthDayList.size() == 2) {
-                        int month = Integer.parseInt(yearMonthDayList.get(0));
-                        int day = Integer.parseInt(yearMonthDayList.get(1));
-                        contact.birthday = new Contact.Birthday(new Date(0).getYear(), month, day);
-                    } else {
-                        int year = Integer.parseInt(yearMonthDayList.get(0));
-                        int month = Integer.parseInt(yearMonthDayList.get(1));
-                        int day = Integer.parseInt(yearMonthDayList.get(2));
-                        contact.birthday = new Contact.Birthday(year, month, day);
+                    try {
+                        String birthday = cursor.getString(cursor.getColumnIndex(Event.START_DATE)).replace("--", "");
+                        String[] yearMonthDay = birthday.split("-");
+                        List<String> yearMonthDayList = Arrays.asList(yearMonthDay);
+
+                        if (yearMonthDayList.size() == 2) {
+                            // birthday is formatted "12-31"
+                            int month = Integer.parseInt(yearMonthDayList.get(0));
+                            int day = Integer.parseInt(yearMonthDayList.get(1));
+                            if (month >= 1 && month <= 12 && day >= 1 && day <= 31) {
+                                contact.birthday = new Contact.Birthday(month, day);
+                            }
+                        } else if (yearMonthDayList.size() == 3) {
+                            // birthday is formatted "1986-12-31"
+                            int year = Integer.parseInt(yearMonthDayList.get(0));
+                            int month = Integer.parseInt(yearMonthDayList.get(1));
+                            int day = Integer.parseInt(yearMonthDayList.get(2));
+                            if (year > 0 && month >= 1 && month <= 12 && day >= 1 && day <= 31) {
+                                contact.birthday = new Contact.Birthday(year, month, day);
+                            }
+                        }
+                    } catch (NumberFormatException|ArrayIndexOutOfBoundsException e) {
+                        // whoops, birthday isn't in the format we expect
+                        Log.w("ContactsProvider", e.toString());
+                        
                     }
                 }
             }
@@ -419,7 +432,9 @@ public class ContactsProvider {
 
             WritableMap birthdayMap = Arguments.createMap();
             if (birthday != null) {
-                birthdayMap.putInt("year", birthday.year);
+                if (birthday.year > 0) {
+                    birthdayMap.putInt("year", birthday.year);
+                }
                 birthdayMap.putInt("month", birthday.month);
                 birthdayMap.putInt("day", birthday.day);
                 contact.putMap("birthday", birthdayMap);
@@ -445,6 +460,11 @@ public class ContactsProvider {
 
             public Birthday(int year, int month, int day) {
                 this.year = year;
+                this.month = month;
+                this.day = day;
+            }
+
+            public Birthday(int month, int day) {
                 this.month = month;
                 this.day = day;
             }
