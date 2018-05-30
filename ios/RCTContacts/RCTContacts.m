@@ -689,8 +689,6 @@ RCT_EXPORT_METHOD(exportVCard:(NSArray *)contactIds callback:(RCTResponseSenderB
 RCT_EXPORT_METHOD(importVCard:(NSString *)stringData callback:(RCTResponseSenderBlock) callback)
 {
     NSData *data = [stringData dataUsingEncoding:NSNonLossyASCIIStringEncoding];
-
-//    RCTLogInfo(@"fetchError: %@", fetchError);
     if (data == nil) {
         callback(@[@"undefined error", [NSNull null]]);
     } else {
