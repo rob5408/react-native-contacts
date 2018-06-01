@@ -10,6 +10,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.ContentUris;
+import android.content.res.AssetFileDescriptor;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.Manifest;
@@ -19,6 +21,7 @@ import android.provider.ContactsContract;
 import android.provider.ContactsContract.CommonDataKinds;
 import android.provider.ContactsContract.CommonDataKinds.Organization;
 import android.provider.ContactsContract.CommonDataKinds.StructuredName;
+import android.provider.ContactsContract.Contacts;
 import android.provider.ContactsContract.RawContacts;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
@@ -672,15 +675,146 @@ public class ContactsManager extends ReactContextBaseJavaModule {
 //         }
 //     }
 
+
+//     public void get(Cursor cursor) {
+//         //cursor.moveToFirst();
+//         String lookupKey = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.LOOKUP_KEY));
+//         Uri uri = Uri.withAppendedPath(ContactsContract.Contacts.CONTENT_VCARD_URI, lookupKey);
+//         AssetFileDescriptor fd;
+//         try {
+//             fd = this.getContentResolver().openAssetFileDescriptor(uri, "r");
+
+            // Your Complex Code and you used function without loop so how can you get all Contacts Vcard.??
+
+
+           /* FileInputStream fis = fd.createInputStream();
+            byte[] buf = new byte[(int) fd.getDeclaredLength()];
+            fis.read(buf);
+            String VCard = new String(buf);
+            String path = Environment.getExternalStorageDirectory().toString() + File.separator + vfile;
+            FileOutputStream out = new FileOutputStream(path);
+            out.write(VCard.toString().getBytes());
+            Log.d("Vcard",  VCard);*/
+
+//             FileInputStream fis = fd.createInputStream();
+//             byte[] buf = new byte[(int) fd.getDeclaredLength()];
+//             fis.read(buf);
+//             String vcardstring= new String(buf);
+//             vCard.add(vcardstring);
+// 
+//             String storage_path = Environment.getExternalStorageDirectory().toString() + File.separator + vfile;
+//             FileOutputStream mFileOutputStream = new FileOutputStream(storage_path, true);
+//             mFileOutputStream.write(vcardstring.toString().getBytes());
+// 
+//         } catch (Exception e1) {
+//             // TODO Auto-generated catch block
+//             e1.printStackTrace();
+//         }
+//     }
+
+    String makePlaceholders(int len) {
+        StringBuilder sb = new StringBuilder(len * 2 - 1);
+        sb.append("?");
+        for (int i = 1; i < len; i++)
+            sb.append(",?");
+        return sb.toString();
+    }
+    
     @ReactMethod
     public void exportVCard(ReadableArray contactIds, Callback callback) {
-        // Log.d("TAG", "exportVCard");
+        Log.d("ReactNative", "exportVCard");
+        // Log.d("ReactNative", contactIds);
+        
+        Context ctx = getReactApplicationContext();
+        try {
+            ContentResolver contentResolver = ctx.getContentResolver();
+
+            // ContactsProvider contactsProvider = new ContactsProvider(cr);
+            // WritableMap updatedContact = contactsProvider.getContactById(recordID);
+            
+            String[] selectionArgs = new String[contactIds.size()];
+            for (int i = 0; i < contactIds.size(); i++) {
+                selectionArgs[i] = contactIds.getString(i);
+            }
+            //selectionArgs[contactIds.size()] = true;
+            
+//             final List<String> projection = new ArrayList<String>() {{
+//                 add(ContactsContract.Contacts.CONTENT_VCARD_URI);
+//             }};            
+//                 ContactsContract.Contacts.CONTENT_VCARD_URI,
+//             
+            Cursor cursor = contentResolver.query(
+                ContactsContract.Data.CONTENT_URI,
+                new String[] {Contacts.LOOKUP_KEY},
+                ContactsContract.RawContacts.CONTACT_ID + " IN (" + makePlaceholders(contactIds.size()) + ")",
+                selectionArgs,
+                null
+            );
+            
+            if (cursor == null) {
+                // TODO: reject error
+                // return null;
+                return;
+            }
+            
+            StringBuilder uriListBuilder = new StringBuilder();
+            int index = 0;
+            while (cursor.moveToNext()) {
+                if (index != 0) uriListBuilder.append(':');
+                uriListBuilder.append(cursor.getString(0));
+                index++;
+            }
+            
+            Uri uri = Uri.withAppendedPath(Contacts.CONTENT_MULTI_VCARD_URI, Uri.encode(uriListBuilder.toString()));
+            AssetFileDescriptor fd = contentResolver.openAssetFileDescriptor(uri, "r");
+            FileInputStream fis = fd.createInputStream();
+            byte[] buf = new byte[(int) fd.getDeclaredLength()];
+            fis.read(buf);
+            String vcard = new String(buf);
+            
+            // Output to file
+            // String path = Environment.getExternalStorageDirectory().toString() + File.separator + vfile;
+            // FileOutputStream out = new FileOutputStream(path);
+            // out.write(VCard.toString().getBytes());
+            
+            
+            // return Uri.withAppendedPath(Contacts.CONTENT_MULTI_VCARD_URI, Uri.encode(uriListBuilder.toString()));
+            // String vcard = Uri.parse( Uri.withAppendedPath(Contacts.CONTENT_MULTI_VCARD_URI, Uri.encode(uriListBuilder.toString())) );
+            
+            Log.d("ReactNative", vcard);
+            
+//             if(cursor != null && cursor.getCount() > 0) {
+//                 cursor.moveToFirst();
+//                 for(int i = 0; i < cursor.getCount(); i++) {
+//                     // get(cursor);
+//                     // Log.d("TAG", "Contact "+(i+1)+"VcF String is"+vCard.get(i));
+//                     Log.d("ReactNative", String.format("%d;", i));
+//                     cursor.moveToNext();
+//                 }
+//             } else {
+//                 Log.d("ReactNative", "No Contacts matched this query");
+//             }
+            
+            // ArrayList<String> vCardData;
+//                 for (String contactId : contactIds) {
+//                     Log.d("ReactNative", contactId);
+//                     // fruit is an element of the `fruits` array.
+//                 } 
+            
+            cursor.close();
+            callback.invoke(null, vcard);
+                  
+        } catch (Exception e) {
+            callback.invoke(e.toString());
+        }
+        
+        
         // vfile = "Contacts" + "_" + System.currentTimeMillis()+".vcf";
         // getVcardString();
 
         // String recordID = contact.hasKey("recordID") ? contact.getString("recordID") : null;
       
-        callback.invoke("Unable to export contact to vCard.", null);
+        // callback.invoke("Unable to export contact to vCard.", null);
 
         // try {
         //        Context ctx = getReactApplicationContext();
