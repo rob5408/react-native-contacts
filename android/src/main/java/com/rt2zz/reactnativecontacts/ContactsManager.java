@@ -619,99 +619,6 @@ public class ContactsManager extends ReactContextBaseJavaModule {
         }
     }
 
-    // Cursor cursor;
-    // ArrayList<String> vCard;
-    // String vfile;
-
-    private void getVcardString() {
-        // TODO Auto-generated method stub
-        // vCard = new ArrayList<String>();
-        // cursor = getContentResolver().query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null, null, null, null);
-        // if(cursor != null && cursor.getCount() > 0) {
-        //     cursor.moveToFirst();
-        //     for(int i = 0; i < cursor.getCount(); i++) {
-        //         get(cursor);
-        //         Log.d("TAG", "Contact "+(i+1)+"VcF String is"+vCard.get(i));
-        //         cursor.moveToNext();
-        //     }
-        // } else {
-        //     Log.d("TAG", "No Contacts in Your Phone");
-        // }
-    }
-
-//     public void get(Cursor cursor) {
-//         //cursor.moveToFirst();
-//         String lookupKey = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.LOOKUP_KEY));
-//         Uri uri = Uri.withAppendedPath(ContactsContract.Contacts.CONTENT_VCARD_URI, lookupKey);
-//         AssetFileDescriptor fd;
-//         try {
-//             fd = this.getContentResolver().openAssetFileDescriptor(uri, "r");
-
-            // Your Complex Code and you used function without loop so how can you get all Contacts Vcard.??
-
-
-           /* FileInputStream fis = fd.createInputStream();
-            byte[] buf = new byte[(int) fd.getDeclaredLength()];
-            fis.read(buf);
-            String VCard = new String(buf);
-            String path = Environment.getExternalStorageDirectory().toString() + File.separator + vfile;
-            FileOutputStream out = new FileOutputStream(path);
-            out.write(VCard.toString().getBytes());
-            Log.d("Vcard",  VCard);*/
-
-//             FileInputStream fis = fd.createInputStream();
-//             byte[] buf = new byte[(int) fd.getDeclaredLength()];
-//             fis.read(buf);
-//             String vcardstring= new String(buf);
-//             vCard.add(vcardstring);
-// 
-//             String storage_path = Environment.getExternalStorageDirectory().toString() + File.separator + vfile;
-//             FileOutputStream mFileOutputStream = new FileOutputStream(storage_path, true);
-//             mFileOutputStream.write(vcardstring.toString().getBytes());
-// 
-//         } catch (Exception e1) {
-//             // TODO Auto-generated catch block
-//             e1.printStackTrace();
-//         }
-//     }
-
-
-//     public void get(Cursor cursor) {
-//         //cursor.moveToFirst();
-//         String lookupKey = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.LOOKUP_KEY));
-//         Uri uri = Uri.withAppendedPath(ContactsContract.Contacts.CONTENT_VCARD_URI, lookupKey);
-//         AssetFileDescriptor fd;
-//         try {
-//             fd = this.getContentResolver().openAssetFileDescriptor(uri, "r");
-
-            // Your Complex Code and you used function without loop so how can you get all Contacts Vcard.??
-
-
-           /* FileInputStream fis = fd.createInputStream();
-            byte[] buf = new byte[(int) fd.getDeclaredLength()];
-            fis.read(buf);
-            String VCard = new String(buf);
-            String path = Environment.getExternalStorageDirectory().toString() + File.separator + vfile;
-            FileOutputStream out = new FileOutputStream(path);
-            out.write(VCard.toString().getBytes());
-            Log.d("Vcard",  VCard);*/
-
-//             FileInputStream fis = fd.createInputStream();
-//             byte[] buf = new byte[(int) fd.getDeclaredLength()];
-//             fis.read(buf);
-//             String vcardstring= new String(buf);
-//             vCard.add(vcardstring);
-// 
-//             String storage_path = Environment.getExternalStorageDirectory().toString() + File.separator + vfile;
-//             FileOutputStream mFileOutputStream = new FileOutputStream(storage_path, true);
-//             mFileOutputStream.write(vcardstring.toString().getBytes());
-// 
-//         } catch (Exception e1) {
-//             // TODO Auto-generated catch block
-//             e1.printStackTrace();
-//         }
-//     }
-
     String makePlaceholders(int len) {
         StringBuilder sb = new StringBuilder(len * 2 - 1);
         sb.append("?");
@@ -723,26 +630,16 @@ public class ContactsManager extends ReactContextBaseJavaModule {
     @ReactMethod
     public void exportVCard(ReadableArray contactIds, Callback callback) {
         Log.d("ReactNative", "exportVCard");
-        // Log.d("ReactNative", contactIds);
         
         Context ctx = getReactApplicationContext();
         try {
             ContentResolver contentResolver = ctx.getContentResolver();
 
-            // ContactsProvider contactsProvider = new ContactsProvider(cr);
-            // WritableMap updatedContact = contactsProvider.getContactById(recordID);
-            
             String[] selectionArgs = new String[contactIds.size()];
             for (int i = 0; i < contactIds.size(); i++) {
                 selectionArgs[i] = contactIds.getString(i);
             }
-            //selectionArgs[contactIds.size()] = true;
             
-//             final List<String> projection = new ArrayList<String>() {{
-//                 add(ContactsContract.Contacts.CONTENT_VCARD_URI);
-//             }};            
-//                 ContactsContract.Contacts.CONTENT_VCARD_URI,
-//             
             Cursor cursor = contentResolver.query(
                 ContactsContract.Data.CONTENT_URI,
                 new String[] {Contacts.LOOKUP_KEY},
@@ -772,65 +669,12 @@ public class ContactsManager extends ReactContextBaseJavaModule {
             fis.read(buf);
             String vcard = new String(buf);
             
-            // Output to file
-            // String path = Environment.getExternalStorageDirectory().toString() + File.separator + vfile;
-            // FileOutputStream out = new FileOutputStream(path);
-            // out.write(VCard.toString().getBytes());
-            
-            
-            // return Uri.withAppendedPath(Contacts.CONTENT_MULTI_VCARD_URI, Uri.encode(uriListBuilder.toString()));
-            // String vcard = Uri.parse( Uri.withAppendedPath(Contacts.CONTENT_MULTI_VCARD_URI, Uri.encode(uriListBuilder.toString())) );
-            
-            Log.d("ReactNative", vcard);
-            
-//             if(cursor != null && cursor.getCount() > 0) {
-//                 cursor.moveToFirst();
-//                 for(int i = 0; i < cursor.getCount(); i++) {
-//                     // get(cursor);
-//                     // Log.d("TAG", "Contact "+(i+1)+"VcF String is"+vCard.get(i));
-//                     Log.d("ReactNative", String.format("%d;", i));
-//                     cursor.moveToNext();
-//                 }
-//             } else {
-//                 Log.d("ReactNative", "No Contacts matched this query");
-//             }
-            
-            // ArrayList<String> vCardData;
-//                 for (String contactId : contactIds) {
-//                     Log.d("ReactNative", contactId);
-//                     // fruit is an element of the `fruits` array.
-//                 } 
-            
             cursor.close();
             callback.invoke(null, vcard);
                   
         } catch (Exception e) {
             callback.invoke(e.toString());
         }
-        
-        
-        // vfile = "Contacts" + "_" + System.currentTimeMillis()+".vcf";
-        // getVcardString();
-
-        // String recordID = contact.hasKey("recordID") ? contact.getString("recordID") : null;
-      
-        // callback.invoke("Unable to export contact to vCard.", null);
-
-        // try {
-        //        Context ctx = getReactApplicationContext();
-
-        //        Uri uri = Uri.withAppendedPath(ContactsContract.Contacts.CONTENT_URI,recordID);
-        //        ContentResolver cr = ctx.getContentResolver();
-        //        int deleted = cr.delete(uri,null,null);
-
-        //        if(deleted > 0)
-        //          callback.invoke(null, recordID); // success
-        //        else
-        //          callback.invoke(null, null); // something was wrong
-
-        // } catch (Exception e) {
-        //     callback.invoke(e.toString(), null);
-        // }
     }
 
     /*
